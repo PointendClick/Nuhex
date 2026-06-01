@@ -1,2 +1,2 @@
 # Nuhex
-Prototype for AI Transparency 
+Prototype for AI Transparency https://pointendclick.github.io/Nuhex/
