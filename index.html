@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -45,8 +44,9 @@
             grid-template-rows: repeat(4, 1fr);
             width: 140px;
             height: 140px;
-            background: #000000;
-            border: 1px solid #333;
+            background: #1f2833; 
+            border: 1px solid #1f2833;
+            gap: 1px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
         .matrix3-cell {
@@ -57,12 +57,10 @@
             font-weight: 900;
             font-size: 16px;
             box-sizing: border-box;
-            border-style: solid;
-            border-width: 4px; /* Thick independent borders */
         }
         .input-screen {
-            background: #f5f6f8; /* Whitish background */
-            border: 3px solid #45a29e; /* Kept original border color */
+            background: #f5f6f8;
+            border: 3px solid #45a29e;
             border-radius: 12px;
             padding: 20px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.3);
@@ -71,7 +69,7 @@
             width: 100%;
             height: 80px;
             border: none;
-            color: #000000; /* Black font color */
+            color: #000000;
             background: transparent;
             font-family: 'Courier New', Courier, monospace;
             font-size: 26px;
@@ -81,112 +79,270 @@
             outline: none;
             caret-color: #000000;
         }
-        .label-tag {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: #45a29e;
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    
     <div>
-        <div class="label-tag"></div>
         <div id="glyphOutput" class="output-screen"></div>
     </div>
-
     <div>
-        <div class="label-tag"></div>
         <div class="input-screen">
             <textarea id="textInput" placeholder="" autofocus></textarea>
         </div>
     </div>
-
 </div>
 
 <script>
     const textInput = document.getElementById('textInput');
     const glyphOutput = document.getElementById('glyphOutput');
 
-    // EXACT 16 CODEX COLORS IN SYSTEM ORDER (0-15)
-    const codexColors = [
-        '#dbb1b8', // Color 0
-        '#00ffff', // Color 1
-        '#808080', // Color 2
-        '#ff00ff', // Color 3
-        '#469696', // Color 4
-        '#ffff00', // Color 5
-        '#00ff00', // Color 6
-        '#800080', // Color 7
-        '#0000ff', // Color 8
-        '#ff0000', // Color 9
-        '#ffffff', // Color 10
-        '#000000', // Color 11
-        '#ff9900', // Color 12
-        '#674ea7', // Color 13
-        '#7f6000', // Color 14
-        '#056c30'  // Color 15
+    // COLOR REGISTRY
+    const colorRegistry = [
+        '#dbb1b8', // Index 0: TL (Teal/Pink Tint)
+        '#00ffff', // Index 1: CN (Cyan)
+        '#808080', // Index 2: GY (Gray)
+        '#ff00ff', // Index 3: PK (Pink)
+        '#469696', // Index 4: XR (Sea)
+        '#ffff00', // Index 5: YW (Yellow)
+        '#00ff00', // Index 6: GN (Green)
+        '#7f007f', // Index 7: PR (Purple)
+        '#0000ff', // Index 8: BL (Blue)
+        '#ff0000', // Index 9: RD (Red)
+        '#ffffff', // Index 10: WT (White)
+        '#000000', // Index 11: BK (Black)
+        '#ff9900', // Index 12: OR (Orange)
+        '#674ea7', // Index 13: BP (Blurple)
+        '#7f6000', // Index 14: BN (Brown)
+        '#006100'  // Index 15: JD (Jade)
     ];
 
-    const indexChars = ['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'];
+    // Character Profiles
+    const charProfiles = {
+        'a': { bg: colorRegistry[0], initialFontIdx: 1, display: '0' },
+        'b': { bg: colorRegistry[0], initialFontIdx: 1, display: '1' },
+        'c': { bg: colorRegistry[0], initialFontIdx: 1, display: '2' },
+        'd': { bg: colorRegistry[0], initialFontIdx: 1, display: '3' },
+        'e': { bg: colorRegistry[0], initialFontIdx: 1, display: '4' },
+        'f': { bg: colorRegistry[0], initialFontIdx: 1, display: '5' },
+        'g': { bg: colorRegistry[0], initialFontIdx: 1, display: '6' },
+        'h': { bg: colorRegistry[0], initialFontIdx: 1, display: '7' },
+        'i': { bg: colorRegistry[0], initialFontIdx: 1, display: '8' },
+        'j': { bg: colorRegistry[0], initialFontIdx: 1, display: '9' },
+        'k': { bg: colorRegistry[0], initialFontIdx: 1, display: 'A' },
+        'l': { bg: colorRegistry[0], initialFontIdx: 1, display: 'B' },
+        'm': { bg: colorRegistry[0], initialFontIdx: 1, display: 'C' },
+        'n': { bg: colorRegistry[0], initialFontIdx: 1, display: 'D' },
+
+        'o': { bg: colorRegistry[4], initialFontIdx: 5, display: '0' },
+        'p': { bg: colorRegistry[4], initialFontIdx: 5, display: '1' },
+        'q': { bg: colorRegistry[4], initialFontIdx: 5, display: '2' },
+        'r': { bg: colorRegistry[4], initialFontIdx: 5, display: '3' },
+        's': { bg: colorRegistry[4], initialFontIdx: 5, display: '4' },
+        't': { bg: colorRegistry[4], initialFontIdx: 5, display: '5' },
+        'u': { bg: colorRegistry[4], initialFontIdx: 5, display: '6' },
+        'v': { bg: colorRegistry[4], initialFontIdx: 5, display: '7' },
+        'w': { bg: colorRegistry[4], initialFontIdx: 5, display: '8' },
+        'x': { bg: colorRegistry[4], initialFontIdx: 5, display: '9' },
+        'y': { bg: colorRegistry[4], initialFontIdx: 5, display: 'A' },
+        'z': { bg: colorRegistry[4], initialFontIdx: 5, display: 'B' },
+
+        'A': { bg: colorRegistry[8], initialFontIdx: 9, display: '0' },
+        'B': { bg: colorRegistry[8], initialFontIdx: 9, display: '1' },
+        'C': { bg: colorRegistry[8], initialFontIdx: 9, display: '2' },
+        'D': { bg: colorRegistry[8], initialFontIdx: 9, display: '3' },
+        'E': { bg: colorRegistry[8], initialFontIdx: 9, display: '4' },
+        'F': { bg: colorRegistry[8], initialFontIdx: 9, display: '5' },
+        'G': { bg: colorRegistry[8], initialFontIdx: 9, display: '6' },
+        'H': { bg: colorRegistry[8], initialFontIdx: 9, display: '7' },
+        'I': { bg: colorRegistry[8], initialFontIdx: 9, display: '8' },
+        'J': { bg: colorRegistry[8], initialFontIdx: 9, display: '9' },
+        'K': { bg: colorRegistry[8], initialFontIdx: 9, display: 'A' },
+        'L': { bg: colorRegistry[8], initialFontIdx: 9, display: 'B' },
+        'M': { bg: colorRegistry[8], initialFontIdx: 9, display: 'C' },
+        'N': { bg: colorRegistry[8], initialFontIdx: 9, display: 'D' },
+
+        'O': { bg: colorRegistry[12], initialFontIdx: 1, display: '0' },
+        'P': { bg: colorRegistry[12], initialFontIdx: 1, display: '1' },
+        'Q': { bg: colorRegistry[12], initialFontIdx: 1, display: '2' },
+        'R': { bg: colorRegistry[12], initialFontIdx: 1, display: '3' },
+        'S': { bg: colorRegistry[12], initialFontIdx: 1, display: '4' },
+        'T': { bg: colorRegistry[12], initialFontIdx: 1, display: '5' },
+        'U': { bg: colorRegistry[12], initialFontIdx: 1, display: '6' },
+        'V': { bg: colorRegistry[12], initialFontIdx: 1, display: '7' },
+        'W': { bg: colorRegistry[12], initialFontIdx: 1, display: '8' },
+        'X': { bg: colorRegistry[12], initialFontIdx: 1, display: '9' },
+        'Y': { bg: colorRegistry[12], initialFontIdx: 1, display: 'A' },
+        'Z': { bg: colorRegistry[12], initialFontIdx: 1, display: 'B' }
+    };
+
+    // Huffman Tokens
+    const huffmanTokens = {
+        'th':  { display: '4', bg: colorRegistry[1], initialFontIdx: 4 }, 
+        'er':  { display: '0', bg: colorRegistry[1], initialFontIdx: 2 }, 
+        'in':  { display: '5', bg: colorRegistry[5], initialFontIdx: 6 }, 
+        'nd':  { display: '0', bg: colorRegistry[5], initialFontIdx: 6 }, 
+        'ion': { display: '5', bg: colorRegistry[6], initialFontIdx: 3 }, 
+        'com': { display: '0', bg: colorRegistry[6], initialFontIdx: 3 }, 
+        'res': { display: '0', bg: colorRegistry[2], initialFontIdx: 3 }  
+    };
+
+    function makeMatrixFrame() {
+        const matrix = document.createElement('div');
+        matrix.className = 'hyperglyph-matrix';
+        return matrix;
+    }
 
     textInput.addEventListener('input', () => {
-        const text = textInput.value;
-        if (!text) {
+        const val = textInput.value;
+        if (!val) {
             glyphOutput.innerHTML = "";
             return;
         }
 
-        let hexStream = "";
-        for (let i = 0; i < text.length; i++) {
-            let hex = text.charCodeAt(i).toString(16);
-            hexStream += hex.padStart(2, '0');
+        let segments = [];
+        let ptr = 0;
+
+        // Lexical Token Parser
+        while (ptr < val.length) {
+            // Priority 1: Match the specific 3-char macro block sequence " space I space "
+            if (val.substr(ptr, 3) === ' I ') {
+                segments.push({ type: 'macro-I', raw: ' I ' });
+                ptr += 3;
+                continue;
+            }
+
+            // Priority 2: Standard Huffman tokens
+            let t3 = val.substr(ptr, 3);
+            let t2 = val.substr(ptr, 2);
+
+            if (huffmanTokens[t3] !== undefined) {
+                segments.push({ type: 'huffman', raw: t3, data: huffmanTokens[t3] });
+                ptr += 3;
+            } else if (huffmanTokens[t2] !== undefined) {
+                segments.push({ type: 'huffman', raw: t2, data: huffmanTokens[t2] });
+                ptr += 2;
+            } else {
+                // Priority 3: Standalone items (Individual spaces, individual periods, or solo capital I's)
+                segments.push({ type: 'standard', raw: val[ptr] });
+                ptr += 1;
+            }
         }
 
-        let chunks = [];
-        for (let i = 0; i < hexStream.length; i += 16) {
-            let chunk = hexStream.substring(i, i + 16);
-            if (chunk.length < 16) chunk = chunk.padEnd(16, '0');
-            chunks.push(chunk);
+        let cellStream = [];
+        let consecutiveMatchCount = 0;
+        let lastTokenRaw = null;
+
+        segments.forEach(segment => {
+            // Action 1: If it's the explicit 3-character compression string " space I space "
+            if (segment.type === 'macro-I') {
+                consecutiveMatchCount = 0;
+                lastTokenRaw = null;
+                cellStream.push({
+                    bg: colorRegistry[11],    // Solid Black Cell
+                    font: colorRegistry[10],  // Solid White Text
+                    display: 'I'
+                });
+                return;
+            }
+
+            // Action 2: If it's a standalone normal space character ' '
+            if (segment.raw === ' ') {
+                consecutiveMatchCount = 0;
+                lastTokenRaw = null;
+                cellStream.push({
+                    bg: colorRegistry[10],    // Pure White Cell
+                    font: 'transparent',
+                    display: ''
+                });
+                return;
+            }
+
+            // Action 3: If it's a standalone normal period character '.'
+            if (segment.raw === '.') {
+                consecutiveMatchCount = 0;
+                lastTokenRaw = null;
+                cellStream.push({
+                    bg: colorRegistry[11],    // Pure Black Cell
+                    font: 'transparent',
+                    display: ''
+                });
+                return;
+            }
+
+            // Sequential duplicate pattern tracking (The Merv color shift)
+            if (segment.raw === lastTokenRaw) {
+                consecutiveMatchCount++;
+            } else {
+                consecutiveMatchCount = 0;
+            }
+            lastTokenRaw = segment.raw;
+
+            let baseBg, initialFontIdx, displayChar;
+
+            if (segment.type === 'huffman') {
+                baseBg = segment.data.bg;
+                initialFontIdx = segment.data.initialFontIdx;
+                displayChar = segment.data.display;
+            } else {
+                // Individual capital 'I' matches profile map here cleanly: Blue background, text character '8'
+                let profile = charProfiles[segment.raw] || { bg: colorRegistry[11], initialFontIdx: 10, display: segment.raw };
+                baseBg = profile.bg;
+                initialFontIdx = profile.initialFontIdx;
+                displayChar = profile.display;
+            }
+
+            // Calculate font color step index rotation
+            let finalFontIdx = (initialFontIdx + consecutiveMatchCount) % 16;
+            
+            cellStream.push({
+                bg: baseBg,
+                font: colorRegistry[finalFontIdx],
+                display: displayChar
+            });
+        });
+
+        // Frame slice blocks into standard 4x4 segments (16 entries per matrix plate)
+        let plates = [];
+        let currentPlate = [];
+        cellStream.forEach(cell => {
+            currentPlate.push(cell);
+            if (currentPlate.length === 16) {
+                plates.push(currentPlate);
+                currentPlate = [];
+            }
+        });
+
+        // Padding sequence for incomplete plates
+        if (currentPlate.length > 0) {
+            while (currentPlate.length < 16) {
+                let fillIdx = currentPlate.length;
+                currentPlate.push({
+                    bg: colorRegistry[fillIdx],
+                    font: 'transparent',
+                    display: ''
+                });
+            }
+            plates.push(currentPlate);
         }
 
+        // Output Generation Render Loop
         glyphOutput.innerHTML = "";
-        chunks.forEach(chunk => {
-            const matrixSquare = buildMatrixSquare(chunk);
-            glyphOutput.appendChild(matrixSquare);
+        plates.forEach(plateData => {
+            const matrixGrid = makeMatrixFrame();
+            for (let i = 0; i < 16; i++) {
+                const data = plateData[i];
+                const cell = document.createElement('div');
+                cell.className = 'matrix3-cell';
+                cell.style.backgroundColor = data.bg;
+                cell.style.color = data.font;
+                cell.innerText = data.display;
+                matrixGrid.appendChild(cell);
+            }
+            glyphOutput.appendChild(matrixGrid);
         });
     });
-
-    function buildMatrixSquare(hexChunk) {
-        const matrixContainer = document.createElement('div');
-        matrixContainer.className = 'hyperglyph-matrix';
-
-        for (let i = 0; i < 16; i++) {
-            const baseValue = parseInt(hexChunk[i], 16);
-            
-            const cell = document.createElement('div');
-            cell.className = 'matrix3-cell';
-            
-            cell.style.backgroundColor = codexColors[baseValue];
-            
-            const borderColorIndex = (baseValue + 4) % 16;
-            cell.style.borderColor = codexColors[borderColorIndex];
-            
-            const fontColorIndex = (baseValue + 8) % 16;
-            cell.style.color = codexColors[fontColorIndex];
-            
-            cell.innerText = indexChars[(baseValue + i) % 16];
-
-            matrixContainer.appendChild(cell);
-        }
-
-        return matrixContainer;
-    }
 </script>
 
 </body>
