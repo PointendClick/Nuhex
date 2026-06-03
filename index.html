@@ -1,349 +1,297 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #1a1d29;
-            color: #ffffff;
-            margin: 0;
-            padding: 15px;
-            height: 100vh;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow: hidden;
+
+<!DOCTYPE html><html lang="en"><head>    
+    <meta charset="UTF-8">    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
+    <title>Dual-Input Generative Glyph Engine</title>
+    <style>        
+        body {            
+            font-family: Arial, sans-serif;            
+            background-color: #1a1d29;            
+            color: #ffffff;            
+            margin: 0;            
+            padding: 15px;            
+            height: 100vh;            
+            box-sizing: border-box;            
+            display: flex;            
+            flex-direction: column;            
+            align-items: center;            
+            overflow: hidden;        
+        }        
+        .container {            
+            width: 100%;            
+            max-width: 750px;            
+            height: auto;            
+            display: flex;            
+            flex-direction: column;            
+            gap: 15px;        
+        }        
+        .output-screen {            
+            background: #141519;            
+            border: 4px solid #1f2833;            
+            border-radius: 16px;            
+            min-height: 360px;            
+            padding: 25px;            
+            display: flex;            
+            flex-wrap: wrap;            
+            gap: 25px;            
+            justify-content: center;            
+            align-items: center;            
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);        
+        }        
+        .hyperglyph-matrix {            
+            display: grid;            
+            grid-template-columns: repeat(4, 1fr);            
+            grid-template-rows: repeat(4, 1fr);            
+            width: 160px;            
+            height: 160px;            
+            background: #1f2833;             
+            border: 1px solid #1f2833;            
+            gap: 2px;            
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);        
+        }        
+        .matrix3-cell {            
+            display: flex;            
+            align-items: center;            
+            justify-content: center;            
+            font-family: 'Courier New', Courier, monospace;            
+            font-weight: 900;            
+            font-size: 20px;            
+            letter-spacing: 1px;
+            box-sizing: border-box;            
+            user-select: none;
+        }        
+        .matrix3-cell span {
+            display: inline-block;
         }
-        .container {
-            width: 100%;
-            max-width: 750px;
-            height: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .output-screen {
-            background: #141519;
-            border: 4px solid #1f2833;
-            border-radius: 16px;
-            min-height: 360px;
-            padding: 25px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 25px;
-            justify-content: center;
-            align-items: center;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
-        }
-        .hyperglyph-matrix {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: repeat(4, 1fr);
-            width: 140px;
-            height: 140px;
-            background: #1f2833; 
-            border: 1px solid #1f2833;
-            gap: 1px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        }
-        .matrix3-cell {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Courier New', Courier, monospace;
-            font-weight: 900;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-        .input-screen {
-            background: #f5f6f8;
-            border: 3px solid #45a29e;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-        }
-        textarea {
-            width: 100%;
-            height: 80px;
-            border: none;
-            color: #000000;
-            background: transparent;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 26px;
-            font-weight: bold;
-            box-sizing: border-box;
-            resize: none;
-            outline: none;
-            caret-color: #000000;
-        }
+        .input-screen {            
+            background: #f5f6f8;            
+            border: 3px solid #45a29e;            
+            border-radius: 12px;            
+            padding: 20px;            
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);        
+        }        
+        textarea {            
+            width: 100%;            
+            height: 80px;            
+            border: none;            
+            color: #000000;            
+            background: transparent;            
+            font-family: 'Courier New', Courier, monospace;            
+            font-size: 26px;            
+            font-weight: bold;            
+            box-sizing: border-box;            
+            resize: none;            
+            outline: none;            
+            caret-color: #000000;        
+        }    
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div>
-        <div id="glyphOutput" class="output-screen"></div>
-    </div>
-    <div>
-        <div class="input-screen">
-            <textarea id="textInput" placeholder="" autofocus></textarea>
-        </div>
+<div class="container">    
+    <div>        
+        <div id="glyphOutput" class="output-screen"></div>    
+    </div>    
+    <div>        
+        <div class="input-screen">            
+            <textarea id="textInput" autofocus></textarea>        
+        </div>    
     </div>
 </div>
 
-<script>
-    const textInput = document.getElementById('textInput');
+<script>    
+    const textInput = document.getElementById('textInput');    
     const glyphOutput = document.getElementById('glyphOutput');
 
-    // COLOR REGISTRY
-    const colorRegistry = [
-        '#dbb1b8', // Index 0: TL (Teal/Pink Tint)
-        '#00ffff', // Index 1: CN (Cyan)
-        '#808080', // Index 2: GY (Gray)
-        '#ff00ff', // Index 3: PK (Pink)
-        '#469696', // Index 4: XR (Sea)
-        '#ffff00', // Index 5: YW (Yellow)
-        '#00ff00', // Index 6: GN (Green)
-        '#7f007f', // Index 7: PR (Purple)
-        '#0000ff', // Index 8: BL (Blue)
-        '#ff0000', // Index 9: RD (Red)
-        '#ffffff', // Index 10: WT (White)
-        '#000000', // Index 11: BK (Black)
-        '#ff9900', // Index 12: OR (Orange)
-        '#674ea7', // Index 13: BP (Blurple)
-        '#7f6000', // Index 14: BN (Brown)
-        '#006100'  // Index 15: JD (Jade)
+    const colorMatrix = [
+        ['#dbb1b8', '#00ffff', '#808080', '#ff00ff'], 
+        ['#469696', '#ffff00', '#00ff00', '#800080'], 
+        ['#0000ff', '#ff0000', '#ffffff', '#000000'], 
+        ['#ff9900', '#674ea7', '#7f6000', '#056c30']  
     ];
 
-    // Character Profiles
+    const flatRegistry = [
+        '#dbb1b8', '#00ffff', '#808080', '#ff00ff',
+        '#469696', '#ffff00', '#00ff00', '#808080',
+        '#0000ff', '#ff0000', '#ffffff', '#000000',
+        '#ff9900', '#674ea7', '#7f6000', '#056c30'
+    ];
+
     const charProfiles = {
-        'a': { bg: colorRegistry[0], initialFontIdx: 1, display: '0' },
-        'b': { bg: colorRegistry[0], initialFontIdx: 1, display: '1' },
-        'c': { bg: colorRegistry[0], initialFontIdx: 1, display: '2' },
-        'd': { bg: colorRegistry[0], initialFontIdx: 1, display: '3' },
-        'e': { bg: colorRegistry[0], initialFontIdx: 1, display: '4' },
-        'f': { bg: colorRegistry[0], initialFontIdx: 1, display: '5' },
-        'g': { bg: colorRegistry[0], initialFontIdx: 1, display: '6' },
-        'h': { bg: colorRegistry[0], initialFontIdx: 1, display: '7' },
-        'i': { bg: colorRegistry[0], initialFontIdx: 1, display: '8' },
-        'j': { bg: colorRegistry[0], initialFontIdx: 1, display: '9' },
-        'k': { bg: colorRegistry[0], initialFontIdx: 1, display: 'A' },
-        'l': { bg: colorRegistry[0], initialFontIdx: 1, display: 'B' },
-        'm': { bg: colorRegistry[0], initialFontIdx: 1, display: 'C' },
-        'n': { bg: colorRegistry[0], initialFontIdx: 1, display: 'D' },
+        'a': { row: 0, display: '0' }, 'b': { row: 0, display: '1' }, 'c': { row: 0, display: '2' }, 'd': { row: 0, display: '3' }, 
+        'e': { row: 0, display: '4' }, 'f': { row: 0, display: '5' }, 'g': { row: 0, display: '6' }, 'h': { row: 0, display: '7' }, 
+        'i': { row: 0, display: '8' }, 'j': { row: 0, display: '9' }, 'k': { row: 0, display: 'A' }, 'l': { row: 0, display: 'B' }, 
+        'm': { row: 0, display: 'C' }, 'n': { row: 0, display: 'D' },
 
-        'o': { bg: colorRegistry[4], initialFontIdx: 5, display: '0' },
-        'p': { bg: colorRegistry[4], initialFontIdx: 5, display: '1' },
-        'q': { bg: colorRegistry[4], initialFontIdx: 5, display: '2' },
-        'r': { bg: colorRegistry[4], initialFontIdx: 5, display: '3' },
-        's': { bg: colorRegistry[4], initialFontIdx: 5, display: '4' },
-        't': { bg: colorRegistry[4], initialFontIdx: 5, display: '5' },
-        'u': { bg: colorRegistry[4], initialFontIdx: 5, display: '6' },
-        'v': { bg: colorRegistry[4], initialFontIdx: 5, display: '7' },
-        'w': { bg: colorRegistry[4], initialFontIdx: 5, display: '8' },
-        'x': { bg: colorRegistry[4], initialFontIdx: 5, display: '9' },
-        'y': { bg: colorRegistry[4], initialFontIdx: 5, display: 'A' },
-        'z': { bg: colorRegistry[4], initialFontIdx: 5, display: 'B' },
+        'o': { row: 1, display: '0' }, 'p': { row: 1, display: '1' }, 'q': { row: 1, display: '2' }, 'r': { row: 1, display: '3' }, 
+        's': { row: 1, display: '4' }, 't': { row: 1, display: '5' }, 'u': { row: 1, display: '6' }, 'v': { row: 1, display: '7' }, 
+        'w': { row: 1, display: '8' }, 'x': { row: 1, display: '9' }, 'y': { row: 1, display: 'A' }, 'z': { row: 1, display: 'B' },
 
-        'A': { bg: colorRegistry[8], initialFontIdx: 9, display: '0' },
-        'B': { bg: colorRegistry[8], initialFontIdx: 9, display: '1' },
-        'C': { bg: colorRegistry[8], initialFontIdx: 9, display: '2' },
-        'D': { bg: colorRegistry[8], initialFontIdx: 9, display: '3' },
-        'E': { bg: colorRegistry[8], initialFontIdx: 9, display: '4' },
-        'F': { bg: colorRegistry[8], initialFontIdx: 9, display: '5' },
-        'G': { bg: colorRegistry[8], initialFontIdx: 9, display: '6' },
-        'H': { bg: colorRegistry[8], initialFontIdx: 9, display: '7' },
-        'I': { bg: colorRegistry[8], initialFontIdx: 9, display: '8' },
-        'J': { bg: colorRegistry[8], initialFontIdx: 9, display: '9' },
-        'K': { bg: colorRegistry[8], initialFontIdx: 9, display: 'A' },
-        'L': { bg: colorRegistry[8], initialFontIdx: 9, display: 'B' },
-        'M': { bg: colorRegistry[8], initialFontIdx: 9, display: 'C' },
-        'N': { bg: colorRegistry[8], initialFontIdx: 9, display: 'D' },
+        'A': { row: 2, display: '0' }, 'B': { row: 2, display: '1' }, 'C': { row: 2, display: '2' }, 'D': { row: 2, display: '3' }, 
+        'E': { row: 2, display: '4' }, 'F': { row: 2, display: '5' }, 'G': { row: 2, display: '6' }, 'H': { row: 2, display: '7' }, 
+        'I': { row: 2, display: '8' }, 'J': { row: 2, display: '9' }, 'K': { row: 2, display: 'A' }, 'L': { row: 2, display: 'B' }, 
+        'M': { row: 2, display: 'C' }, 'N': { row: 2, display: 'D' },
 
-        'O': { bg: colorRegistry[12], initialFontIdx: 1, display: '0' },
-        'P': { bg: colorRegistry[12], initialFontIdx: 1, display: '1' },
-        'Q': { bg: colorRegistry[12], initialFontIdx: 1, display: '2' },
-        'R': { bg: colorRegistry[12], initialFontIdx: 1, display: '3' },
-        'S': { bg: colorRegistry[12], initialFontIdx: 1, display: '4' },
-        'T': { bg: colorRegistry[12], initialFontIdx: 1, display: '5' },
-        'U': { bg: colorRegistry[12], initialFontIdx: 1, display: '6' },
-        'V': { bg: colorRegistry[12], initialFontIdx: 1, display: '7' },
-        'W': { bg: colorRegistry[12], initialFontIdx: 1, display: '8' },
-        'X': { bg: colorRegistry[12], initialFontIdx: 1, display: '9' },
-        'Y': { bg: colorRegistry[12], initialFontIdx: 1, display: 'A' },
-        'Z': { bg: colorRegistry[12], initialFontIdx: 1, display: 'B' }
+        'O': { row: 3, display: '0' }, 'P': { row: 3, display: '1' }, 'Q': { row: 3, display: '2' }, 'R': { row: 3, display: '3' }, 
+        'S': { row: 3, display: '4' }, 'T': { row: 3, display: '5' }, 'U': { row: 3, display: '6' }, 'V': { row: 3, display: '7' }, 
+        'W': { row: 3, display: '8' }, 'X': { row: 3, display: '9' }, 'Y': { row: 3, display: 'A' }, 'Z': { row: 3, display: 'B' }
     };
 
-    // Huffman Tokens
     const huffmanTokens = {
-        'th':  { display: '4', bg: colorRegistry[1], initialFontIdx: 4 }, 
-        'er':  { display: '0', bg: colorRegistry[1], initialFontIdx: 2 }, 
-        'in':  { display: '5', bg: colorRegistry[5], initialFontIdx: 6 }, 
-        'nd':  { display: '0', bg: colorRegistry[5], initialFontIdx: 6 }, 
-        'ion': { display: '5', bg: colorRegistry[6], initialFontIdx: 3 }, 
-        'com': { display: '0', bg: colorRegistry[6], initialFontIdx: 3 }, 
-        'res': { display: '0', bg: colorRegistry[2], initialFontIdx: 3 }  
+        'th':  { display1: '4', row: 0 }, 
+        'er':  { display1: '0', row: 0 }, 
+        'in':  { display1: '5', row: 1 }, 
+        'nd':  { display1: '0', row: 1 }, 
+        'ion': { display1: '5', row: 1 }, 
+        'com': { display1: '0', row: 1 }, 
+        'res': { display1: '0', row: 0 }      
     };
 
-    function makeMatrixFrame() {
-        const matrix = document.createElement('div');
-        matrix.className = 'hyperglyph-matrix';
-        return matrix;
+    function makeMatrixFrame() {        
+        const matrix = document.createElement('div');        
+        matrix.className = 'hyperglyph-matrix';        
+        return matrix;    
     }
 
-    textInput.addEventListener('input', () => {
-        const val = textInput.value;
-        if (!val) {
-            glyphOutput.innerHTML = "";
-            return;
+    textInput.addEventListener('input', () => {        
+        const val = textInput.value;        
+        if (!val) {            
+            glyphOutput.innerHTML = "";            
+            return;        
         }
 
-        let segments = [];
+        let segments = [];        
         let ptr = 0;
 
-        // Lexical Token Parser
-        while (ptr < val.length) {
-            // Priority 1: Match the specific 3-char macro block sequence " space I space "
-            if (val.substr(ptr, 3) === ' I ') {
-                segments.push({ type: 'macro-I', raw: ' I ' });
-                ptr += 3;
-                continue;
+        while (ptr < val.length) {            
+            if (val.substr(ptr, 3) === ' I ') {                
+                segments.push({ type: 'macro-I', raw: ' I ' });                
+                ptr += 3;                
+                continue;            
             }
 
-            // Priority 2: Standard Huffman tokens
-            let t3 = val.substr(ptr, 3);
+            let t3 = val.substr(ptr, 3);            
             let t2 = val.substr(ptr, 2);
 
-            if (huffmanTokens[t3] !== undefined) {
-                segments.push({ type: 'huffman', raw: t3, data: huffmanTokens[t3] });
-                ptr += 3;
-            } else if (huffmanTokens[t2] !== undefined) {
-                segments.push({ type: 'huffman', raw: t2, data: huffmanTokens[t2] });
-                ptr += 2;
-            } else {
-                // Priority 3: Standalone items (Individual spaces, individual periods, or solo capital I's)
-                segments.push({ type: 'standard', raw: val[ptr] });
-                ptr += 1;
-            }
+            if (huffmanTokens[t3] !== undefined) {                
+                segments.push({ type: 'huffman', raw: t3, data: huffmanTokens[t3] });                
+                ptr += 3;            
+            } else if (huffmanTokens[t2] !== undefined) {                
+                segments.push({ type: 'huffman', raw: t2, data: huffmanTokens[t2] });                
+                ptr += 2;            
+            } else {                
+                segments.push({ type: 'standard', raw: val[ptr] });                
+                ptr += 1;            
+            }        
         }
 
         let cellStream = [];
-        let consecutiveMatchCount = 0;
-        let lastTokenRaw = null;
+        let sPtr = 0;
 
-        segments.forEach(segment => {
-            // Action 1: If it's the explicit 3-character compression string " space I space "
-            if (segment.type === 'macro-I') {
-                consecutiveMatchCount = 0;
-                lastTokenRaw = null;
-                cellStream.push({
-                    bg: colorRegistry[11],    // Solid Black Cell
-                    font: colorRegistry[10],  // Solid White Text
-                    display: 'I'
-                });
-                return;
+        while (sPtr < segments.length) {
+            let seg1 = segments[sPtr];
+            let seg2 = segments[sPtr + 1];
+
+            if (seg1.type === 'macro-I') {
+                cellStream.push({ type: 'raw', bg: colorMatrix[2][3], f1: '#ffffff', f2: 'transparent', d1: 'I', d2: '' });
+                sPtr += 1;
+                continue;
+            }
+            if (seg1.raw === ' ') {
+                cellStream.push({ type: 'raw', bg: colorMatrix[2][2], f1: 'transparent', f2: 'transparent', d1: '', d2: '' });
+                sPtr += 1;
+                continue;
+            }
+            if (seg1.raw === '.') {
+                cellStream.push({ type: 'raw', bg: colorMatrix[2][3], f1: 'transparent', f2: 'transparent', d1: '', d2: '' });
+                sPtr += 1;
+                continue;
             }
 
-            // Action 2: If it's a standalone normal space character ' '
-            if (segment.raw === ' ') {
-                consecutiveMatchCount = 0;
-                lastTokenRaw = null;
-                cellStream.push({
-                    bg: colorRegistry[10],    // Pure White Cell
-                    font: 'transparent',
-                    display: ''
-                });
-                return;
+            if (seg2 && (seg2.type === 'macro-I' || seg2.raw === ' ' || seg2.raw === '.')) {
+                seg2 = null; 
             }
 
-            // Action 3: If it's a standalone normal period character '.'
-            if (segment.raw === '.') {
-                consecutiveMatchCount = 0;
-                lastTokenRaw = null;
-                cellStream.push({
-                    bg: colorRegistry[11],    // Pure Black Cell
-                    font: 'transparent',
-                    display: ''
-                });
-                return;
-            }
+            if (seg1 && seg2) {
+                let p1 = (seg1.type === 'huffman') ? { row: seg1.data.row, display: seg1.data.display1 } : (charProfiles[seg1.raw] || { row: 2, display: seg1.raw });
+                let p2 = (seg2.type === 'huffman') ? { row: seg2.data.row, display: seg2.data.display1 } : (charProfiles[seg2.raw] || { row: 2, display: seg2.raw });
 
-            // Sequential duplicate pattern tracking (The Merv color shift)
-            if (segment.raw === lastTokenRaw) {
-                consecutiveMatchCount++;
+                let bg = colorMatrix[p1.row][0];      
+                let f1Color = colorMatrix[p2.row][1]; 
+                let f2Color = colorMatrix[p2.row][2]; 
+
+                cellStream.push({
+                    type: 'dual',
+                    bg: bg,
+                    f1: f1Color,
+                    f2: f2Color,
+                    d1: p1.display,
+                    d2: p2.display
+                });
+                sPtr += 2; 
             } else {
-                consecutiveMatchCount = 0;
-            }
-            lastTokenRaw = segment.raw;
-
-            let baseBg, initialFontIdx, displayChar;
-
-            if (segment.type === 'huffman') {
-                baseBg = segment.data.bg;
-                initialFontIdx = segment.data.initialFontIdx;
-                displayChar = segment.data.display;
-            } else {
-                // Individual capital 'I' matches profile map here cleanly: Blue background, text character '8'
-                let profile = charProfiles[segment.raw] || { bg: colorRegistry[11], initialFontIdx: 10, display: segment.raw };
-                baseBg = profile.bg;
-                initialFontIdx = profile.initialFontIdx;
-                displayChar = profile.display;
-            }
-
-            // Calculate font color step index rotation
-            let finalFontIdx = (initialFontIdx + consecutiveMatchCount) % 16;
-            
-            cellStream.push({
-                bg: baseBg,
-                font: colorRegistry[finalFontIdx],
-                display: displayChar
-            });
-        });
-
-        // Frame slice blocks into standard 4x4 segments (16 entries per matrix plate)
-        let plates = [];
-        let currentPlate = [];
-        cellStream.forEach(cell => {
-            currentPlate.push(cell);
-            if (currentPlate.length === 16) {
-                plates.push(currentPlate);
-                currentPlate = [];
-            }
-        });
-
-        // Padding sequence for incomplete plates
-        if (currentPlate.length > 0) {
-            while (currentPlate.length < 16) {
-                let fillIdx = currentPlate.length;
-                currentPlate.push({
-                    bg: colorRegistry[fillIdx],
-                    font: 'transparent',
-                    display: ''
+                let p1 = (seg1.type === 'huffman') ? { row: seg1.data.row, display: seg1.data.display1 } : (charProfiles[seg1.raw] || { row: 2, display: seg1.raw });
+                
+                cellStream.push({
+                    type: 'dual',
+                    bg: colorMatrix[p1.row][0],
+                    f1: colorMatrix[p1.row][1],
+                    f2: 'transparent',
+                    d1: p1.display,
+                    d2: ''
                 });
+                sPtr += 1;
             }
-            plates.push(currentPlate);
         }
 
-        // Output Generation Render Loop
-        glyphOutput.innerHTML = "";
-        plates.forEach(plateData => {
-            const matrixGrid = makeMatrixFrame();
-            for (let i = 0; i < 16; i++) {
-                const data = plateData[i];
-                const cell = document.createElement('div');
-                cell.className = 'matrix3-cell';
-                cell.style.backgroundColor = data.bg;
-                cell.style.color = data.font;
-                cell.innerText = data.display;
-                matrixGrid.appendChild(cell);
-            }
-            glyphOutput.appendChild(matrixGrid);
-        });
+        let blocks = [];        
+        let currentBlock = [];        
+        cellStream.forEach(cell => {            
+            currentBlock.push(cell);            
+            if (currentBlock.length === 16) {                
+                blocks.push(currentBlock);                
+                currentBlock = [];            
+            }        
+        });        
+
+        if (currentBlock.length > 0) {            
+            while (currentBlock.length < 16) {                
+                let fillIdx = currentBlock.length;                
+                currentBlock.push({                    
+                    type: 'raw',
+                    bg: flatRegistry[fillIdx],                    
+                    f1: 'transparent',                    
+                    f2: 'transparent',                    
+                    d1: '',
+                    d2: ''                
+                });            
+            }            
+            blocks.push(currentBlock);        
+        }        
+
+        glyphOutput.innerHTML = "";        
+        blocks.forEach(blockData => {            
+            const matrixGrid = makeMatrixFrame();            
+            for (let i = 0; i < 16; i++) {                
+                const data = blockData[i];                
+                const cell = document.createElement('div');                
+                cell.className = 'matrix3-cell';                
+                cell.style.backgroundColor = data.bg;                
+                
+                const el1 = document.createElement('span');
+                el1.style.color = data.f1;
+                el1.innerText = data.d1;
+
+                const el2 = document.createElement('span');
+                el2.style.color = data.f2;
+                el2.innerText = data.d2;
+                
+                cell.appendChild(el1);
+                cell.appendChild(el2);
+                matrixGrid.appendChild(cell);            
+            }            
+            glyphOutput.appendChild(matrixGrid);        
+        });    
     });
 </script>
-
-</body>
-</html>
+</body></html>
