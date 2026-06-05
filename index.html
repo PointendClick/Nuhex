@@ -1,197 +1,231 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-                body {
-                        font-family: Arial, sans-serif;
-                        background-color: #1a1d29;
-                        color: #ffffff;
-                        margin: 0;
-                        padding: 15px;
-                        height: 100vh;
-                        box-sizing: border-box;
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        overflow: hidden;
-                }
-                .container {
-                        width: 100%;
-                        max-width: 750px;
-                        height: auto;
-                        display: flex;
-                        flex-direction: column;
-                        gap: 15px;
-                }
-                .output-screen {
-                        background: #141519;
-                        border: 4px solid #1f2833;
-                        border-radius: 16px;
-                        min-height: 360px;
-                        padding: 25px;
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: 25px;
-                        justify-content: center;
-                        align-items: center;
-                        box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
-                }
-                .hyperglyph-matrix {
-                        display: grid;
-                        grid-template-columns: repeat(4, 1fr);
-                        grid-template-rows: repeat(4, 1fr);
-                        width: 220px;
-                        height: 220px;
-                        background: #1f2833; 
-                        border: 1px solid #1f2833;
-                        gap: 5px;
-                        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-                }
-                .matrix4-cell {
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        font-family: 'Courier New', Courier, monospace;
-                        font-weight: 900;
-                        font-size: 26px;
-                        box-sizing: border-box;
-                        user-select: none;
-                        border-style: solid;
-                        border-width: 8px;
-                }
-                .input-screen {
-                        background: #f5f6f8;
-                        border: 3px solid #45a29e;
-                        border-radius: 12px;
-                        padding: 20px;
-                        box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-                }
-                textarea {
-                        width: 100%;
-                        height: 80px;
-                        border: none;
-                        color: #000000;
-                        background: transparent;
-                        font-family: 'Courier New', Courier, monospace;
-                        font-size: 26px;
-                        font-weight: bold;
-                        box-sizing: border-box;
-                        resize: none;
-                        outline: none;
-                        caret-color: #000000;
-                }
-        </style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1d29;
+            color: #ffffff;
+            margin: 0;
+            padding: 15px;
+            height: 100vh;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+        }
+        .container {
+            width: 100%;
+            max-width: 750px;
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .output-screen {
+            background: #141519;
+            border: 4px solid #1f2833;
+            border-radius: 16px;
+            min-height: 360px;
+            padding: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+        }
+        .hyperglyph-matrix {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            width: 220px;
+            height: 220px;
+            background: #1f2833; 
+            border: 1px solid #1f2833;
+            gap: 5px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .matrix4-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: 900;
+            font-size: 26px;
+            box-sizing: border-box;
+            user-select: none;
+            border: 1px solid #1f2833;
+        }
+        .input-screen {
+            background: #f5f6f8;
+            border: 3px solid #45a29e;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        textarea {
+            width: 100%;
+            height: 80px;
+            border: none;
+            color: #000000;
+            background: transparent;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 26px;
+            font-weight: bold;
+            box-sizing: border-box;
+            resize: none;
+            outline: none;
+            caret-color: #000000;
+        }
+    </style>
 </head>
 <body>
 
 <div class="container">
-        <div>
-                <div id="glyphOutput" class="output-screen"></div>
+    <div>
+        <div id="glyphOutput" class="output-screen"></div>
+    </div>
+    <div>
+        <div class="input-screen">
+            <textarea id="textInput" autofocus></textarea>
         </div>
-        <div>
-                <div class="input-screen">
-                        <textarea id="textInput" autofocus></textarea>
-                </div>
-        </div>
+    </div>
 </div>
 
 <script>
+document.addEventListener('DOMContentLoaded', () => {
     const textInput = document.getElementById('textInput');
     const glyphOutput = document.getElementById('glyphOutput');
 
+    // Master Palette Array using your explicit hex positions (0-15)
     const hexColors = [
-        '#dbb1b8', '#00ffff', '#808080', '#ff00ff',
-        '#469696', '#ffff00', '#00ff00', '#800080',
-        '#0000ff', '#ff0000', '#ffffff', '#000000',
-        '#ff9900', '#674ea7', '#7f6000', '#056c30'
+        '#dbb1b8', // 0: TL
+        '#00ffff', // 1: CN
+        '#808080', // 2: GY
+        '#ff00ff', // 3: PK
+        '#469696', // 4: XR
+        '#ffff00', // 5: YW
+        '#00ff00', // 6: GN
+        '#800080', // 7: PR
+        '#0000ff', // 8: BL
+        '#ff0000', // 9: RD
+        '#ffffff', // 10: WT
+        '#000000', // 11: BK
+        '#ff9900', // 12: OR
+        '#674ea7', // 13: BP
+        '#7f6000', // 14: BN
+        '#056c30'  // 15: JD
     ];
 
-    const alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-    
-    function getCharIndex(char) {
-        return alphabet.indexOf(char);
-    }
+    // EXACT LAYOUT DICTIONARY MAPPING
+    const matrixRules = {
+        // ROW 1
+        '0': { bg: '#dbb1b8', font: '#00ffff' }, // bg: TL, font: CN
+        'a': { bg: '#dbb1b8', font: '#00ffff' }, // bg: TL, font: CN
+        '4': { bg: '#00ffff', font: '#808080' }, // bg: CN, font: GY
+        'd': { bg: '#00ffff', font: '#808080' }, // bg: CN, font: GY
+        '8': { bg: '#808080', font: '#ff00ff' }, // bg: GY, font: PK
+        'g': { bg: '#808080', font: '#ff00ff' }, // bg: GY, font: PK
+        'j': { bg: '#ff00ff', font: '#469696' }, // bg: PK, font: XR
+        'k': { bg: '#ff00ff', font: '#469696' }, // bg: PK, font: XR
 
-    function makeMatrixFrame() {
-        const matrix = document.createElement('div');
-        matrix.className = 'hyperglyph-matrix';
-        return matrix;
-    }
+        // ROW 2
+        'b': { bg: '#dbb1b8', font: '#00ffff' }, // bg: TL, font: CN
+        'c': { bg: '#dbb1b8', font: '#00ffff' }, // bg: TL, font: CN
+        'e': { bg: '#00ffff', font: '#808080' }, // bg: CN, font: GY
+        'f': { bg: '#00ffff', font: '#808080' }, // bg: CN, font: GY
+        'h': { bg: '#808080', font: '#ff00ff' }, // bg: GY, font: PK
+        'i': { bg: '#808080', font: '#ff00ff' }, // bg: GY, font: PK
+        'l': { bg: '#ff00ff', font: '#469696' }, // bg: PK, font: XR
+        'm': { bg: '#ff00ff', font: '#469696' }, // bg: PK, font: XR
 
-    textInput.addEventListener('input', () => {
+        // ROW 3
+        'n': { bg: '#469696', font: '#ffff00' }, // bg: XR, font: YW
+        '1': { bg: '#469696', font: '#ffff00' }, // bg: XR, font: YW
+        'q': { bg: '#ffff00', font: '#00ff00' }, // bg: YW, font: GN
+        '5': { bg: '#ffff00', font: '#00ff00' }, // bg: YW, font: GN
+        't': { bg: '#00ff00', font: '#800080' }, // bg: GN, font: PR
+        '9': { bg: '#00ff00', font: '#800080' }, // bg: GN, font: PR
+        'w': { bg: '#800080', font: '#0000ff' }, // bg: PR, font: BL
+        'x': { bg: '#800080', font: '#0000ff' }, // bg: PR, font: BL
+
+        // ROW 4
+        'o': { bg: '#469696', font: '#ffff00' }, // bg: XR, font: YW
+        'p': { bg: '#469696', font: '#ffff00' }, // bg: XR, font: YW
+        'r': { bg: '#ffff00', font: '#00ff00' }, // bg: YW, font: GN
+        's': { bg: '#ffff00', font: '#00ff00' }, // bg: YW, font: GN
+        'u': { bg: '#00ff00', font: '#800080' }, // bg: GN, font: PR
+        'v': { bg: '#00ff00', font: '#800080' }, // bg: GN, font: PR
+        'y': { bg: '#800080', font: '#0000ff' }, // bg: PR, font: BL
+        'z': { bg: '#800080', font: '#0000ff' }, // bg: PR, font: BL
+
+        // ROW 5
+        'A': { bg: '#0000ff', font: '#ff0000' }, // bg: BL, font: RD
+        'B': { bg: '#0000ff', font: '#ff0000' }, // bg: BL, font: RD
+        'D': { bg: '#ff0000', font: '#ffffff' }, // bg: RD, font: WT
+        'E': { bg: '#ff0000', font: '#ffffff' }, // bg: RD, font: WT
+        'H': { bg: '#ffffff', font: '#000000' }, // bg: WT, font: BK
+        'G': { bg: '#ffffff', font: '#000000' }, // bg: WT, font: BK
+        'I': { bg: '#000000', font: '#ff9900' }, // bg: BK, font: OR
+        'J': { bg: '#000000', font: '#ff9900' }, // bg: BK, font: OR
+
+        // ROW 6
+        '2': { bg: '#0000ff', font: '#ff0000' }, // bg: BL, font: RD
+        'C': { bg: '#0000ff', font: '#ff0000' }, // bg: BL, font: RD
+        '6': { bg: '#ff0000', font: '#ffffff' }, // bg: RD, font: WT
+        'F': { bg: '#ff0000', font: '#ffffff' }, // bg: RD, font: WT
+        '.': { bg: '#ffffff', font: '#000000' }, // bg: WT, font: BK
+        ' ': { bg: '#ffffff', font: '#000000' }, // bg: WT, font: BK (Space)
+        'K': { bg: '#000000', font: '#ff9900' }, // bg: BK, font: OR
+        'L': { bg: '#000000', font: '#ff9900' }, // bg: BK, font: OR
+
+        // ROW 7
+        'M': { bg: '#ff9900', font: '#674ea7' }, // bg: OR, font: BP
+        'N': { bg: '#ff9900', font: '#674ea7' }, // bg: OR, font: BP
+        'P': { bg: '#674ea7', font: '#7f6000' }, // bg: BP, font: BN
+        'Q': { bg: '#674ea7', font: '#7f6000' }, // bg: BP, font: BN
+        'S': { bg: '#7f6000', font: '#056c30' }, // bg: BN, font: JD
+        'T': { bg: '#7f6000', font: '#056c30' }, // bg: BN, font: JD
+        'W': { bg: '#056c30', font: '#dbb1b8' }, // bg: JD, font: TL
+        'X': { bg: '#056c30', font: '#dbb1b8' }, // bg: JD, font: TL
+
+        // ROW 8
+        'O': { bg: '#ff9900', font: '#674ea7' }, // bg: OR, font: BP
+        '3': { bg: '#ff9900', font: '#674ea7' }, // bg: OR, font: BP
+        'R': { bg: '#674ea7', font: '#7f6000' }, // bg: BP, font: BN
+        '7': { bg: '#674ea7', font: '#7f6000' }, // bg: BP, font: BN
+        'U': { bg: '#7f6000', font: '#056c30' }, // bg: BN, font: JD
+        'V': { bg: '#7f6000', font: '#056c30' }, // bg: BN, font: JD
+        'Y': { bg: '#056c30', font: '#dbb1b8' }, // bg: JD, font: TL
+        'Z': { bg: '#056c30', font: '#dbb1b8' }  // bg: JD, font: TL
+    };
+
+    function renderBlocks() {
         const val = textInput.value;
+        
         if (!val) {
             glyphOutput.innerHTML = "";
             return;
         }
 
         let cellStream = [];
-        let ptr = 0;
 
-        while (ptr < val.length) {
-            let char1 = val[ptr];
+        for (let i = 0; i < val.length; i++) {
+            let char = val[i];
+            let rule = matrixRules[char];
 
-            if (char1 === ' ') {
-                cellStream.push({ border: '#ffffff', bg: '#ffffff', fontColor: 'transparent', display: '' });
-                ptr += 1;
-                continue;
-            }
-            if (char1 === '.') {
-                cellStream.push({ border: '#000000', bg: '#000000', fontColor: 'transparent', display: '' });
-                ptr += 1;
-                continue;
-            }
+            let bg = rule ? rule.bg : '#141519';
+            let fontColor = rule ? rule.font : '#ffffff';
 
-            let idx1 = getCharIndex(char1);
-            if (idx1 === -1) {
-                ptr += 1;
-                continue;
-            }
-
-            if (ptr + 1 < val.length) {
-                let char2 = val[ptr + 1];
-
-                if (char2 === ' ' || char2 === '.') {
-                    let borderIdx = idx1 % 16;
-                    cellStream.push({
-                        border: hexColors[borderIdx],
-                        bg: '#141519',
-                        fontColor: hexColors[(borderIdx + 4) % 16],
-                        display: char1
-                    });
-                    ptr += 1;
-                } else {
-                    let idx2 = getCharIndex(char2);
-                    if (idx2 === -1) {
-                        ptr += 1;
-                        continue;
-                    }
-
-                    let bdrIdx = idx1 % 16;
-                    let bgIdx  = (idx1 + 5) % 16;
-                    let fontIdx = (idx2 + 10) % 16;
-
-                    cellStream.push({
-                        border: hexColors[bdrIdx],
-                        bg: hexColors[bgIdx],
-                        fontColor: hexColors[fontIdx],
-                        display: char2
-                    });
-                    ptr += 2;
-                }
-            } else {
-                let borderIdx = idx1 % 16;
-                cellStream.push({
-                    border: hexColors[borderIdx],
-                    bg: '#141519',
-                    fontColor: hexColors[(borderIdx + 4) % 16],
-                    display: char1
-                });
-                ptr += 1;
-            }
+            cellStream.push({
+                bg: bg,
+                fontColor: fontColor,
+                display: char
+            });
         }
 
         let blocks = [];
@@ -208,8 +242,7 @@
             while (currentBlock.length < 16) {
                 let fillIdx = currentBlock.length;
                 currentBlock.push({
-                    border: 'transparent',
-                    bg: hexColors[fillIdx],
+                    bg: hexColors[fillIdx], 
                     fontColor: 'transparent',
                     display: ''
                 });
@@ -219,21 +252,26 @@
 
         glyphOutput.innerHTML = "";
         blocks.forEach(blockData => {
-            const matrixGrid = makeMatrixFrame();
+            const matrixGrid = document.createElement('div');
+            matrixGrid.className = 'hyperglyph-matrix';
+
             for (let i = 0; i < 16; i++) {
                 const data = blockData[i];
                 const cell = document.createElement('div');
                 cell.className = 'matrix4-cell';
-                cell.style.borderColor = data.border;
+                
                 cell.style.backgroundColor = data.bg;
                 cell.style.color = data.fontColor;
                 cell.innerText = data.display;
-        
+                
                 matrixGrid.appendChild(cell);
             }
             glyphOutput.appendChild(matrixGrid);
         });
-    });
+    }
+
+    textInput.addEventListener('input', renderBlocks);
+});
 </script>
 </body>
 </html>
