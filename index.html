@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -101,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const textInput = document.getElementById('textInput');
     const glyphOutput = document.getElementById('glyphOutput');
 
-    // Master Palette Array using your explicit hex positions (0-15)
+    // Default structural background grid color sequence (0-15 slots)
     const hexColors = [
         '#dbb1b8', // 0: TL
         '#00ffff', // 1: CN
@@ -121,87 +122,88 @@ document.addEventListener('DOMContentLoaded', () => {
         '#056c30'  // 15: JD
     ];
 
-    // EXACT LAYOUT DICTIONARY MAPPING
+    // MANUAL DICTIONARY FOR THE 64 CHARACTER MAPPINGS
+    // Update the 'display' property for each input key to show its correct structural alias symbol.
     const matrixRules = {
         // ROW 1
-        '0': { bg: '#dbb1b8', font: '#00ffff' }, // bg: TL, font: CN
-        'a': { bg: '#dbb1b8', font: '#00ffff' }, // bg: TL, font: CN
-        '4': { bg: '#00ffff', font: '#808080' }, // bg: CN, font: GY
-        'd': { bg: '#00ffff', font: '#808080' }, // bg: CN, font: GY
-        '8': { bg: '#808080', font: '#ff00ff' }, // bg: GY, font: PK
-        'g': { bg: '#808080', font: '#ff00ff' }, // bg: GY, font: PK
-        'j': { bg: '#ff00ff', font: '#469696' }, // bg: PK, font: XR
-        'k': { bg: '#ff00ff', font: '#469696' }, // bg: PK, font: XR
+        '0': { bg: '#dbb1b8', font: '#00ffff', display: '0' }, // bg: TL, font: CN
+        'a': { bg: '#dbb1b8', font: '#00ffff', display: '1' }, // bg: TL, font: CN -> Outputs structural symbol '1'
+        '4': { bg: '#00ffff', font: '#808080', display: '4' }, // bg: CN, font: GY
+        'd': { bg: '#00ffff', font: '#808080', display: '5' }, // bg: CN, font: GY
+        '8': { bg: '#808080', font: '#ff00ff', display: '8' }, // bg: GY, font: PK
+        'g': { bg: '#808080', font: '#ff00ff', display: '9' }, // bg: GY, font: PK
+        'j': { bg: '#ff00ff', font: '#469696', display: 'C' }, // bg: PK, font: XR
+        'k': { bg: '#ff00ff', font: '#469696', display: 'D' }, // bg: PK, font: XR
 
         // ROW 2
-        'b': { bg: '#dbb1b8', font: '#00ffff' }, // bg: TL, font: CN
-        'c': { bg: '#dbb1b8', font: '#00ffff' }, // bg: TL, font: CN
-        'e': { bg: '#00ffff', font: '#808080' }, // bg: CN, font: GY
-        'f': { bg: '#00ffff', font: '#808080' }, // bg: CN, font: GY
-        'h': { bg: '#808080', font: '#ff00ff' }, // bg: GY, font: PK
-        'i': { bg: '#808080', font: '#ff00ff' }, // bg: GY, font: PK
-        'l': { bg: '#ff00ff', font: '#469696' }, // bg: PK, font: XR
-        'm': { bg: '#ff00ff', font: '#469696' }, // bg: PK, font: XR
+        'b': { bg: '#dbb1b8', font: '#00ffff', display: '2' }, // bg: TL, font: CN
+        'c': { bg: '#dbb1b8', font: '#00ffff', display: '3' }, // bg: TL, font: CN
+        'e': { bg: '#00ffff', font: '#808080', display: '6' }, // bg: CN, font: GY
+        'f': { bg: '#00ffff', font: '#808080', display: '7' }, // bg: CN, font: GY
+        'h': { bg: '#808080', font: '#ff00ff', display: 'A' }, // bg: GY, font: PK
+        'i': { bg: '#808080', font: '#ff00ff', display: 'B' }, // bg: GY, font: PK
+        'l': { bg: '#ff00ff', font: '#469696', display: 'E' }, // bg: PK, font: XR
+        'm': { bg: '#ff00ff', font: '#469696', display: 'F' }, // bg: PK, font: XR
 
         // ROW 3
-        'n': { bg: '#469696', font: '#ffff00' }, // bg: XR, font: YW
-        '1': { bg: '#469696', font: '#ffff00' }, // bg: XR, font: YW
-        'q': { bg: '#ffff00', font: '#00ff00' }, // bg: YW, font: GN
-        '5': { bg: '#ffff00', font: '#00ff00' }, // bg: YW, font: GN
-        't': { bg: '#00ff00', font: '#800080' }, // bg: GN, font: PR
-        '9': { bg: '#00ff00', font: '#800080' }, // bg: GN, font: PR
-        'w': { bg: '#800080', font: '#0000ff' }, // bg: PR, font: BL
-        'x': { bg: '#800080', font: '#0000ff' }, // bg: PR, font: BL
+        'n': { bg: '#469696', font: '#ffff00', display: '0' }, // bg: XR, font: YW
+        '1': { bg: '#469696', font: '#ffff00', display: '1' }, // bg: XR, font: YW
+        'q': { bg: '#ffff00', font: '#00ff00', display: '4' }, // bg: YW, font: GN
+        '5': { bg: '#ffff00', font: '#00ff00', display: '5' }, // bg: YW, font: GN
+        't': { bg: '#00ff00', font: '#800080', display: '8' }, // bg: GN, font: PR
+        '9': { bg: '#00ff00', font: '#800080', display: '9' }, // bg: GN, font: PR
+        'w': { bg: '#800080', font: '#0000ff', display: 'C' }, // bg: PR, font: BL
+        'x': { bg: '#800080', font: '#0000ff', display: 'D' }, // bg: PR, font: BL
 
         // ROW 4
-        'o': { bg: '#469696', font: '#ffff00' }, // bg: XR, font: YW
-        'p': { bg: '#469696', font: '#ffff00' }, // bg: XR, font: YW
-        'r': { bg: '#ffff00', font: '#00ff00' }, // bg: YW, font: GN
-        's': { bg: '#ffff00', font: '#00ff00' }, // bg: YW, font: GN
-        'u': { bg: '#00ff00', font: '#800080' }, // bg: GN, font: PR
-        'v': { bg: '#00ff00', font: '#800080' }, // bg: GN, font: PR
-        'y': { bg: '#800080', font: '#0000ff' }, // bg: PR, font: BL
-        'z': { bg: '#800080', font: '#0000ff' }, // bg: PR, font: BL
+        'o': { bg: '#469696', font: '#ffff00', display: '2' }, // bg: XR, font: YW
+        'p': { bg: '#469696', font: '#ffff00', display: '3' }, // bg: XR, font: YW
+        'r': { bg: '#ffff00', font: '#00ff00', display: '6' }, // bg: YW, font: GN
+        's': { bg: '#ffff00', font: '#00ff00', display: '7' }, // bg: YW, font: GN
+        'u': { bg: '#00ff00', font: '#800080', display: 'A' }, // bg: GN, font: PR
+        'v': { bg: '#00ff00', font: '#800080', display: 'B' }, // bg: GN, font: PR
+        'y': { bg: '#800080', font: '#0000ff', display: 'E' }, // bg: PR, font: BL
+        'z': { bg: '#800080', font: '#0000ff', display: 'F' }, // bg: PR, font: BL
 
         // ROW 5
-        'A': { bg: '#0000ff', font: '#ff0000' }, // bg: BL, font: RD
-        'B': { bg: '#0000ff', font: '#ff0000' }, // bg: BL, font: RD
-        'D': { bg: '#ff0000', font: '#ffffff' }, // bg: RD, font: WT
-        'E': { bg: '#ff0000', font: '#ffffff' }, // bg: RD, font: WT
-        'H': { bg: '#ffffff', font: '#000000' }, // bg: WT, font: BK
-        'G': { bg: '#ffffff', font: '#000000' }, // bg: WT, font: BK
-        'I': { bg: '#000000', font: '#ff9900' }, // bg: BK, font: OR
-        'J': { bg: '#000000', font: '#ff9900' }, // bg: BK, font: OR
+        'A': { bg: '#0000ff', font: '#ff0000', display: '0' }, // bg: BL, font: RD
+        'B': { bg: '#0000ff', font: '#ff0000', display: '1' }, // bg: BL, font: RD
+        'D': { bg: '#ff0000', font: '#ffffff', display: '4' }, // bg: RD, font: WT
+        'E': { bg: '#ff0000', font: '#ffffff', display: '5' }, // bg: RD, font: WT
+        'H': { bg: '#ffffff', font: '#000000', display: '8' }, // bg: WT, font: BK
+        'G': { bg: '#ffffff', font: '#000000', display: '9' }, // bg: WT, font: BK
+        'I': { bg: '#000000', font: '#ff9900', display: 'C' }, // bg: BK, font: OR
+        'J': { bg: '#000000', font: '#ff9900', display: 'D' }, // bg: BK, font: OR
 
         // ROW 6
-        '2': { bg: '#0000ff', font: '#ff0000' }, // bg: BL, font: RD
-        'C': { bg: '#0000ff', font: '#ff0000' }, // bg: BL, font: RD
-        '6': { bg: '#ff0000', font: '#ffffff' }, // bg: RD, font: WT
-        'F': { bg: '#ff0000', font: '#ffffff' }, // bg: RD, font: WT
-        '.': { bg: '#ffffff', font: '#000000' }, // bg: WT, font: BK
-        ' ': { bg: '#ffffff', font: '#000000' }, // bg: WT, font: BK (Space)
-        'K': { bg: '#000000', font: '#ff9900' }, // bg: BK, font: OR
-        'L': { bg: '#000000', font: '#ff9900' }, // bg: BK, font: OR
+        '2': { bg: '#0000ff', font: '#ff0000', display: '2' }, // bg: BL, font: RD
+        'C': { bg: '#0000ff', font: '#ff0000', display: '3' }, // bg: BL, font: RD
+        '6': { bg: '#ff0000', font: '#ffffff', display: '6' }, // bg: RD, font: WT
+        'F': { bg: '#ff0000', font: '#ffffff', display: '7' }, // bg: RD, font: WT
+        '.': { bg: '#ffffff', font: '#000000', display: '.' }, // bg: WT, font: BK
+        ' ': { bg: '#ffffff', font: '#000000', display: ' ' }, // bg: WT, font: BK (Space)
+        'K': { bg: '#000000', font: '#ff9900', display: 'E' }, // bg: BK, font: OR
+        'L': { bg: '#000000', font: '#ff9900', display: 'F' }, // bg: BK, font: OR
 
         // ROW 7
-        'M': { bg: '#ff9900', font: '#674ea7' }, // bg: OR, font: BP
-        'N': { bg: '#ff9900', font: '#674ea7' }, // bg: OR, font: BP
-        'P': { bg: '#674ea7', font: '#7f6000' }, // bg: BP, font: BN
-        'Q': { bg: '#674ea7', font: '#7f6000' }, // bg: BP, font: BN
-        'S': { bg: '#7f6000', font: '#056c30' }, // bg: BN, font: JD
-        'T': { bg: '#7f6000', font: '#056c30' }, // bg: BN, font: JD
-        'W': { bg: '#056c30', font: '#dbb1b8' }, // bg: JD, font: TL
-        'X': { bg: '#056c30', font: '#dbb1b8' }, // bg: JD, font: TL
+        'M': { bg: '#ff9900', font: '#674ea7', display: '0' }, // bg: OR, font: BP
+        'N': { bg: '#ff9900', font: '#674ea7', display: '1' }, // bg: OR, font: BP
+        'P': { bg: '#674ea7', font: '#7f6000', display: '4' }, // bg: BP, font: BN
+        'Q': { bg: '#674ea7', font: '#7f6000', display: '5' }, // bg: BP, font: BN
+        'S': { bg: '#7f6000', font: '#056c30', display: '8' }, // bg: BN, font: JD
+        'T': { bg: '#7f6000', font: '#056c30', display: '9' }, // bg: BN, font: JD
+        'W': { bg: '#056c30', font: '#dbb1b8', display: 'C' }, // bg: JD, font: TL
+        'X': { bg: '#056c30', font: '#dbb1b8', display: 'D' }, // bg: JD, font: TL
 
         // ROW 8
-        'O': { bg: '#ff9900', font: '#674ea7' }, // bg: OR, font: BP
-        '3': { bg: '#ff9900', font: '#674ea7' }, // bg: OR, font: BP
-        'R': { bg: '#674ea7', font: '#7f6000' }, // bg: BP, font: BN
-        '7': { bg: '#674ea7', font: '#7f6000' }, // bg: BP, font: BN
-        'U': { bg: '#7f6000', font: '#056c30' }, // bg: BN, font: JD
-        'V': { bg: '#7f6000', font: '#056c30' }, // bg: BN, font: JD
-        'Y': { bg: '#056c30', font: '#dbb1b8' }, // bg: JD, font: TL
-        'Z': { bg: '#056c30', font: '#dbb1b8' }  // bg: JD, font: TL
+        'O': { bg: '#ff9900', font: '#674ea7', display: '2' }, // bg: OR, font: BP
+        '3': { bg: '#ff9900', font: '#674ea7', display: '3' }, // bg: OR, font: BP
+        'R': { bg: '#674ea7', font: '#7f6000', display: '6' }, // bg: BP, font: BN
+        '7': { bg: '#674ea7', font: '#7f6000', display: '7' }, // bg: BP, font: BN
+        'U': { bg: '#7f6000', font: '#056c30', display: 'A' }, // bg: BN, font: JD
+        'V': { bg: '#7f6000', font: '#056c30', display: 'B' }, // bg: BN, font: JD
+        'Y': { bg: '#056c30', font: '#dbb1b8', display: 'E' }, // bg: JD, font: TL
+        'Z': { bg: '#056c30', font: '#dbb1b8', display: 'F' }  // bg: JD, font: TL
     };
 
     function renderBlocks() {
@@ -220,11 +222,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let bg = rule ? rule.bg : '#141519';
             let fontColor = rule ? rule.font : '#ffffff';
+            let txtDisplay = rule ? rule.display : char;
 
             cellStream.push({
                 bg: bg,
                 fontColor: fontColor,
-                display: char
+                display: txtDisplay
             });
         }
 
